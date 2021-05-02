@@ -1,11 +1,11 @@
-# mandelbrot visualisation tutorial
+# mandelbrot visualization tutorial
 
 in this tutorial we will create an app with gtk 3.0 and rust to display the mandelbrot set.
 
 ## 0.0: What is the mandelbrot set?
 from https://en.wikipedia.org/wiki/Mandelbrot_set:
 
-> "_The Mandelbrot set (/ˈmændəlbrɒt/) is the set of complex numbers c for which the function f(z) = z² + c does not diverge when iterated from z = 0, i.e., for which the sequence f(0),f(f(0)), etc., remains bounded in absolute value._"
+> "_The Mandelbrot set (/ˈmændəlbrɒt/) is the set of complex numbers c for which the function f<sub>n+1</sub>(z)=z<sub>n</sub>² + c does not diverge when iterated from z = 0, i.e., for which the sequence f(0),f(f(0)), etc., remains bounded in absolute value._"
 
 ## 0.1: What is Rust?
 >rust is a modern low-level programming language that focuses on security and speed. It is free and open-source.
@@ -64,6 +64,7 @@ fn check_if_in_set(c: f64) -> bool {
     }
     // let's see whether this number get's big. If it does, it is not contained in the mandelbrot set
     // note: once again, the number 100 is chosen fairly arbitrarily.
+    // note: since the values can diverge to negative infinity and positive infinity we'll need to use the absolute value
     if z.abs() > 100.0 {
         return false;
     } else {
@@ -83,8 +84,8 @@ the number -1 is in the set: true
 the number 0.5 is in the set: false
 the number 1 is in the set: false
 ```
-let's go through this line by line!
-
+let's go through this code:
+Once again, in order for a number c to be in the mandelbrot set, iterating through f<sub>n+1</sub>(z)=z<sub>n</sub>²+c with z<sub>0</sub> = 0 mustn't diverge.
 
 
 ## let's get graphic!
