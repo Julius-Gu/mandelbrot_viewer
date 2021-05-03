@@ -79,14 +79,37 @@ Now that we have a function for one iteration, we need to call it multiple times
 ```rust
 // from check_if_in_set(c)
     // ...
+    let mut z: f64 = 0.0;
+    // repeat 100 times:
+    // note: this number should technically be infinite, but that would not be calculatable.
     for _i in 0..100 {
         z = iteration(z,c);
     }
     // ...
 ```
-where our function gets called a hundret times in a row and the result is saved in z.
+where our function gets called a hundred times in a row and the result is saved in z.
 
-> note: To some who already know the ownership model in rust, this might seem a bit weird, after all shouldn't z get moved to the iteration function? This would indeed be the case if our z weren't a simple type (f64 in this case). With simple types, the value gets copied over instead of a pointer to the data being copied. This slight point of confusion is there because it would indeed be slower overall to copy pointers for simple types.
+To make this more understandable, let's look at an example:
+We want to know if the number 0.5 is in the set:
+
+```
+0.0) z is set to 0
+1.0) call iteration with (z=0 and c=0,5)
+-> in iteration: return 0*0+0.5=0.5
+1.1) store this value (0.5) in z
+2.0) call iteration with (z=0.5 and c=0.5)
+-> 0.5*0.5+0.5=0.75
+2.1) store this value (0.75) in z
+3.0) call iteration with (z=0.75 and c=0,5)
+-> 0.75*0.75+0.5=1.0625
+3.1) store this value (1.0625) in z
+4.0) call iteration with (z=1.0625 and c=0,5)
+-> 1.0625*1.0625+0.5 = 1.62890625
+```
+and so on.
+
+on the 10th iteration of this, we'll be at `20 773 872 763 941 816`. Needless to say, this number gets **very** big.
+
 
 ## Hello, imaginaries!
 The Mandelbrot set gains it beauty and fractality from being plotted [on the imaginary plane](https://en.wikipedia.org/wiki/Complex_number). It only makes sense for us then, to make our programm accept imaginary numbers.
