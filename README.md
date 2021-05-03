@@ -1,22 +1,3 @@
-# mandelbrot visualization tutorial
-
-in this tutorial we will create an app with gtk 3.0 and rust to display the mandelbrot set.
-
-## 0.0: What is the mandelbrot set?
-from https://en.wikipedia.org/wiki/Mandelbrot_set:
-
-> "_The Mandelbrot set (/ˈmændəlbrɒt/) is the set of complex numbers c for which the function f<sub>n+1</sub>(z)=z<sub>n</sub>² + c does not diverge when iterated from z = 0, i.e., for which the sequence f(0),f(f(0)), etc., remains bounded in absolute value._"
-
-## 0.1: What is Rust?
->rust is a modern low-level programming language that focuses on security and speed. It is free and open-source.
-
-You can find more information about it at https://www.rust-lang.org/.
-
-## 0.2: What is GTK?
->gtk is a free and open-source GUI library that provides many language bindings. It can run on Linux, MS Windows and MacOS.
-
-You can find more information about it at https://gtk.org/.
-
 ## 1.0: creating a project
 
 open the terminal and go to your projects folder. then type **`cargo new mandelbrot`** and **`cd mandelbrot/`** (or **`cd .\mandelbrot\`** on windows).
@@ -85,75 +66,28 @@ the number 0.5 is in the set: false
 the number 1 is in the set: false
 ```
 let's go through this code:
-Once again, in order for a number c to be in the mandelbrot set, iterating through f<sub>n+1</sub>(z)=z<sub>n</sub>²+c with z<sub>0</sub> = 0 mustn't diverge.
-
-
-## let's get graphic!
-
-for the interface, we'll use a glade file. You can create your own interface with [glade](https://glade.gnome.org/).
-in the mandelbrot directory, create a folder called **`rsc/`** and save this **`main_window.glade`** file.
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.2 -->
-<interface>
-  <requires lib="gtk+" version="3.24"/>
-  <object class="GtkWindow" id="main_window">
-    <property name="can-focus">False</property>
-    <child>
-      <object class="GtkBox">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <child>
-              <object class="GtkButton" id="inc_btn">
-                <property name="label" translatable="yes">+</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="dec_btn">
-                <property name="label" translatable="yes">-</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkDrawingArea" id="drawing_area">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-</interface>
+Once again, in order for a number c to be in the mandelbrot set, iterating through z<sub>n+1</sub>=z<sub>n</sub>²+c with z<sub>0</sub> = 0 mustn't diverge (i.e. become + or - infinite).
+we'll this need a function to iterate through this:
+```rust
+fn iteration(z: f64, c: f64) -> f64 {
+    return z*z + c;
+}
 ```
+notice that this takes two variables of the type **`f64`**. This stands for a 64-bit [floating point number](https://en.wikipedia.org/wiki/Floating-point_arithmetic). Floating point numbers are fascinating, but for short, you can think of them like the computer equivalent to the scientific notation that you learned in scool: 1.234 ⋅ 10<sup>-23</sup>.
+
+Now that we have a function for one iteration, we need to call it multiple times to check whether a given number is in the set. This happens here:
+```rust
+// from check_if_in_set(c)
+    // ...
+    for _i in 0..100 {
+        z = iteration(z,c);
+    }
+    // ...
+```
+where our function gets called a hundret times in a row and the result is saved in z.
+
+> note: To some who already know the ownership model in rust, this might seem a bit weird, after all shouldn't z get moved to the iteration function? This would indeed be the case if our z weren't a simple type (f64 in this case). With simple types, the value gets copied over instead of a pointer to the data being copied. This slight point of confusion is there because it would indeed be slower overall to copy pointers for simple types.
+
+## Hello, imaginaries!
+The Mandelbrot set gains it beauty and fractality from being plotted [on the imaginary plane](https://en.wikipedia.org/wiki/Complex_number). It only makes sense for us then, to make our programm accept imaginary numbers.
+
