@@ -1,4 +1,4 @@
-## 1.0: creating a project (WIP)
+## 1.0: creating a project
 
 open the terminal and go to your projects folder. then type **`cargo new mandelbrot`** and **`cd mandelbrot/`** (or **`cd .\mandelbrot\`** on windows).
 next, type **`cargo run`**. The text "**`Hello, World!`**" should appear in your terminal.
@@ -29,8 +29,8 @@ fn main() {
     // -1 is in the set
     println!("the number {} is in the set: {:?}", -1, check_if_in_set(-1.0));
 
-    // 0.5 is not in the set
-    println!("the number {} is in the set: {:?}", 0.5, check_if_in_set(0.5));
+    // 0.3 is not in the set
+    println!("the number {} is in the set: {:?}", 0.3, check_if_in_set(0.3));
 
     // 1 is not in the set
     println!("the number {} is in the set: {:?}", 1, check_if_in_set(1.0));
@@ -43,10 +43,10 @@ fn check_if_in_set(c: f64) -> bool {
     for _i in 0..100 {
         z = iteration(z,c);
     }
+    println!("z: {}",z);
     // let's see whether this number get's big. If it does, it is not contained in the mandelbrot set
-    // note: once again, the number 100 is chosen fairly arbitrarily.
     // note: since the values can diverge to negative infinity and positive infinity we'll need to use the absolute value
-    if z.abs() > 100.0 {
+    if z.abs() > std::f64::MAX {
         return false;
     } else {
         return true;
@@ -55,15 +55,22 @@ fn check_if_in_set(c: f64) -> bool {
 fn iteration(z: f64, c: f64) -> f64 {
     return z*z + c;
 }
+
 ```
 this will produce the following output:
 ```
 Hello, Mandelbrot!
+z: 0
 the number 0 is in the set: true
+z: 0.11270166537925831
 the number 0.1 is in the set: true
+z: 0
 the number -1 is in the set: true
-the number 0.5 is in the set: false
+z: inf
+the number 0.3 is in the set: false
+z: inf
 the number 1 is in the set: false
+
 ```
 let's go through this code:
 Once again, in order for a number c to be in the mandelbrot set, iterating through z<sub>n+1</sub>=z<sub>n</sub>²+c with z<sub>0</sub> = 0 mustn't diverge (i.e. become + or - infinite).
@@ -108,9 +115,59 @@ We want to know if the number 0.5 is in the set:
 ```
 and so on.
 
-on the 10th iteration of this, we'll be at `20 773 872 763 941 816`. Needless to say, this number gets **very** big.
+On the 10th iteration of this, we'll be at `20 773 872 763 941 816`. Needless to say, this number gets **very** big.
+It may already be obvious that the numbers grow _exponentially_ fast.
+
+Before we head of, lets have a look at this snippet:
+```rust
+// from check_if_in_set
+    if z.abs() > std::f64::MAX {
+        return false;
+    } else {
+        return true;
+    }
+```
+How come that an f64 can be larger than the maximum value?
+
+**in Rust, if a value becomes larger than the maximum value, it becomes inifinite.**
 
 
-## Hello, imaginaries!
+## 1.2: Hello, imaginaries!
 The Mandelbrot set gains it beauty and fractality from being plotted [on the imaginary plane](https://en.wikipedia.org/wiki/Complex_number). It only makes sense for us then, to make our programm accept imaginary numbers.
 
+Before we code it, how may we do this?
+
+we currently have something like
+```
+let z = 0
+repeat 100 times:
+    z = z²+c
+```
+
+now, however, z and c are allowed to be an imaginary number of the form _a+bi_ where _a,b ∈ ℝ_ and _i = √(-1)_.
+
+_z = z² + c_
+
+thus becomes:
+
+_a<sub>z</sub> + b<sub>z</sub>i = (a<sub>z</sub>+b<sub>z</sub>i)² + a<sub>c</sub> + b<sub>c</sub>i_
+
+using the binomial formulas, we get:
+
+_(a<sub>z</sub>+b<sub>z</sub>i)² + a<sub>c</sub> + b<sub>c</sub>i = a<sub>z</sub>²+2a<sub>z</sub>b<sub>z</sub>i+b<sub>z</sub>²i²+ a<sub>c</sub> + b<sub>c</sub>i_
+
+since _i=√(-1)_ → _i²=-1_. Our formula becomes then:
+
+_a<sub>z</sub> + b<sub>z</sub>i = a<sub>z</sub>²+2a<sub>z</sub>b<sub>z</sub>i-b<sub>z</sub>²+ a<sub>c</sub> + b<sub>c</sub>i_
+
+this can be split up into two parts: one for every summand multiplied with _i_ on one for every one without.
+
+_a<sub>z</sub> = a<sub>z</sub>²_
+
+```
+let az = 0
+let bz = 0
+
+repeat 100 times:
+    az+bz*i = (az+bz*i)²+c = az²
+```
