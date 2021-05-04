@@ -1,4 +1,4 @@
-## 1.0: creating a project
+## 1.0: creating a project (WIP)
 
 open the terminal and go to your projects folder. then type **`cargo new mandelbrot`** and **`cd mandelbrot/`** (or **`cd .\mandelbrot\`** on windows).
 next, type **`cargo run`**. The text "**`Hello, World!`**" should appear in your terminal.
