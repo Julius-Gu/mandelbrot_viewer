@@ -55,7 +55,6 @@ fn check_if_in_set(c: f64) -> bool {
 fn iteration(z: f64, c: f64) -> f64 {
     return z*z + c;
 }
-
 ```
 this will produce the following output:
 ```
@@ -162,12 +161,85 @@ _a<sub>z</sub> + b<sub>z</sub>i = a<sub>z</sub>²+2a<sub>z</sub>b<sub>z</sub>i-b
 
 this can be split up into two parts: one for every summand multiplied with _i_ on one for every one without.
 
-_a<sub>z</sub> = a<sub>z</sub>²_
+_a<sub>z</sub> = a<sub>z</sub>²-b<sub>z</sub>²+a<sub>c</sub>_
 
+_b<sub>z</sub> i = 2a<sub>z</sub>b<sub>z</sub>i+b<sub>c</sub>i_  | /i
+
+_b<sub>z</sub> = 2a<sub>z</sub>b<sub>z</sub>+b<sub>c</sub>_
+
+with this, we can create a part of our new algorithm:
 ```
 let az = 0
 let bz = 0
 
 repeat 100 times:
-    az+bz*i = (az+bz*i)²+c = az²
+    // note: since we need az for new_bz, we need a temporary variable
+    let new_az = az²-bz² + ac
+    bz = 2*az*bz + bc
+    az = new_az
 ```
+
+but how can we know whether this diverges to infinity?
+
+We will have a look at its magnitude, i.e. √(a<sub>z</sub>²+b<sub>z</sub>².
+Since √inf = inf, the sqrt isn't necessary.
+
+the full code is thus:
+
+```rust
+fn main() {
+    println!("Hello, Mandelbrot!");
+
+    // check some numbers
+    // 0 is in the set
+    println!("the number {} is in the set: {:?}", 0, check_if_in_set(0.0,0.0));
+
+    // 0.1 is in the set
+    println!("the number {} is in the set: {:?}", "1-i", check_if_in_set(1.0,-1.0));
+
+    // -1 is in the set
+    println!("the number {} is in the set: {:?}", "-0.3+0.1i", check_if_in_set(-0.3,0.1));
+
+    // 0.3 is not in the set
+    println!("the number {} is in the set: {:?}", "5+6i", check_if_in_set(5.0,6.0));
+
+    // 1 is not in the set
+    println!("the number {} is in the set: {:?}", "0.3+0.6i", check_if_in_set(0.3,0.6));
+}
+// input: number of the form a+bi with real numbers a and b
+fn check_if_in_set(ac: f64, bc: f64) -> bool {
+    // z starts at 0
+    let mut az: f64 = 0.0;
+    let mut bz: f64 = 0.0;
+
+    // repeat 100 times:
+    for _i in 0..100 {
+        // break when one of these becomes infinite
+        if az*az>=std::f64::MAX || bz*bz>=std::f64::MAX {
+            break;
+        }
+        let new_az = az*az - bz*bz + ac;
+        bz = 2.0*az*bz + bc;
+        az = new_az;
+        println!("z: {}+{}i",az,bz);
+    }
+    // check if its magnitude is infinite
+    if (az*az+bz*bz) > std::f64::MAX {
+        return false;
+    } else {
+        return true;
+    }
+}
+```
+
+A few things have been added here.
+
+First, this now checks whether the number becomes infinite.
+```rust
+if az*az>=std::f64::MAX || bz*bz>=std::f64::MAX {
+    break;
+}
+```
+this is done
+- in order to make our code faster
+- to avoid substracting two possibly infinite numbers `let new_az = az*az - bz*bz + ac;` which would break maths and destroy our universe
