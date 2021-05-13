@@ -252,4 +252,6 @@ this is done
 - in order to make our code faster
 - to avoid substracting two possibly infinite numbers `let new_az = az*az - bz*bz + ac;` which would break maths and destroy our universe
 
+The full code is available [here](https://github.com/Julius-Gu/mandelbrot_viewer/tree/main/programs/tutorial_1_set_checker)
+
 This is still not the most efficient code and we will refine it later in this tutorial, however you are probably itching to start writing some GTK. We will do this in the next chapter.
